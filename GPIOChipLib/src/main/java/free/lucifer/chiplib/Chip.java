@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib;
 
 import free.lucifer.chiplib.boards.AXP209;
@@ -152,12 +151,6 @@ public class Chip implements IOBoard, Runnable {
 
     @Override
     public void pinMode(Pin pin, Pin.PinMode mode) {
-
-//        if (pin.mode != Pin.PinMode.NONE) {
-//            if (pin.mode != mode) {
-//                System.out.println("Cannot set " + pin + " to mode " + mode + ", it's already set to " + pin.mode);
-//            }
-//        }
         pin.mode = mode;
 
         if (mode == Pin.PinMode.INPUT || mode == Pin.PinMode.PWM || mode == Pin.PinMode.ANALOG) {
@@ -167,6 +160,7 @@ public class Chip implements IOBoard, Runnable {
         } else if (poolPin.contains(pin)) {
             poolPin.remove(pin);
         }
+
         pin.managerInstance.pinMode(pin, mode);
     }
 
