@@ -17,9 +17,6 @@
 package free.lucifer.chiplib.modules;
 
 import free.lucifer.chiplib.Chip;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.concurrent.TimeUnit;
