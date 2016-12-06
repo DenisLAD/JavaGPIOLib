@@ -18,6 +18,7 @@ package free.lucifer.chiplib.natives;
 import com.sun.jna.IntegerType;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public class CLibNative implements CLibInterface {
 
@@ -44,4 +45,7 @@ public class CLibNative implements CLibInterface {
 
     @Override
     native public int munmap(Pointer ptr, NativeSize size);
+
+    @Override
+    native public int ioctl(int fd, int cmd, SpiIocTransfer spiData);
 }

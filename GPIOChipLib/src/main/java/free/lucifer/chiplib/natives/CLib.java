@@ -20,6 +20,7 @@ import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public class CLib {
 
@@ -49,6 +50,10 @@ public class CLib {
 
     public int ioctl(int fd, int cmd, IntegerType arg) {
         return nativeLib.ioctl(fd, cmd, arg);
+    }
+
+    public int ioctl(int fd, int cmd, SpiIocTransfer spiData) {
+        return nativeLib.ioctl(fd, cmd, spiData);
     }
 
     public int open(String path, int flags) {

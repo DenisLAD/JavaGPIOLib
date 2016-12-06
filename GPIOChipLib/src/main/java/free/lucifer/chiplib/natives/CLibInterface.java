@@ -20,6 +20,7 @@ import com.sun.jna.IntegerType;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Library;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public interface CLibInterface extends Library {
 
@@ -28,6 +29,8 @@ public interface CLibInterface extends Library {
     public int ioctl(int fd, int cmd, int arg);
     
     public int ioctl(int fd, int cmd, IntegerType arg);
+    
+    public int ioctl(int fd, int cmd, SpiIocTransfer spiData);
 
     public int close(int fd);
 

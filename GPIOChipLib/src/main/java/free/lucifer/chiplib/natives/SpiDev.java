@@ -15,7 +15,6 @@
  */
 package free.lucifer.chiplib.natives;
 
-import com.sun.jna.Structure;
 import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 /**

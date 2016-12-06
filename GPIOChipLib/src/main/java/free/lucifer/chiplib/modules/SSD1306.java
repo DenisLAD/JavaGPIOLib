@@ -16,11 +16,12 @@
 package free.lucifer.chiplib.modules;
 
 import free.lucifer.chiplib.Chip;
-import free.lucifer.chiplib.modules.spi.SPIClockDivider;
 import free.lucifer.chiplib.modules.ssd1306.Commands;
 import free.lucifer.chiplib.modules.ssd1306.Consts;
 import free.lucifer.chiplib.modules.ssd1306.ControlType;
 import free.lucifer.chiplib.modules.ssd1306.DisplayType;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.util.Arrays;
@@ -159,8 +160,7 @@ public class SSD1306 {
             case HW_SPI:
                 CHIP.pinMode(dc, Chip.Pin.PinMode.OUTPUT);
                 CHIP.pinMode(cs, Chip.Pin.PinMode.OUTPUT);
-                spi.begin();
-                spi.setClockDivider(SPIClockDivider.SPI_CLOCK_DIV2);
+                spi.open();
                 break;
             case I2C:
                 i2c.open();
@@ -190,21 +190,14 @@ public class SSD1306 {
     }
 
     public void display(BufferedImage img) {
-        if (img.getType() != BufferedImage.TYPE_BYTE_BINARY) {
-            BufferedImage tmp = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_BINARY);
-            if (img.getWidth() != display.WIDTH || img.getHeight() != display.HEIGHT) {
-                tmp.getGraphics().drawImage(img, 0, 0, display.WIDTH, display.HEIGHT, null);
-            } else {
-                tmp.getGraphics().drawImage(img, 0, 0, null);
-            }
-            img = tmp;
-        }
+        BufferedImage tmp = new BufferedImage(display.HEIGHT, display.WIDTH, BufferedImage.TYPE_BYTE_BINARY);
 
-        if (img.getWidth() != display.WIDTH || img.getHeight() != display.HEIGHT) {
-            BufferedImage tmp = new BufferedImage(display.WIDTH, display.HEIGHT, BufferedImage.TYPE_BYTE_BINARY);
-            tmp.getGraphics().drawImage(img, 0, 0, display.WIDTH, display.HEIGHT, null);
-            img = tmp;
-        }
+        AffineTransform rotate = AffineTransform.getRotateInstance(Math.PI / 2d, display.HEIGHT / 2, display.WIDTH / 2);
+        Graphics2D g = (Graphics2D) tmp.getGraphics();
+
+        g.drawImage(img, rotate, null);
+
+        img = tmp;
 
         byte[] b = ((DataBufferByte) img.getRaster().getDataBuffer()).getData();
         int c = 0;
@@ -214,6 +207,9 @@ public class SSD1306 {
                 c++;
             }
         }
+
+        g.dispose();
+
         display();
     }
 
@@ -248,7 +244,6 @@ public class SSD1306 {
                 i2c.write(new byte[]{0x00, (byte) cmd});
                 break;
         }
-
     }
 
     public void spiWrite(int cmd) {
@@ -271,6 +266,5 @@ public class SSD1306 {
             default:
                 break;
         }
-
     }
 }

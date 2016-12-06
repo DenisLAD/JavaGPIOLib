@@ -15,6 +15,7 @@
  */
 package free.lucifer.chiplib.natives.spi;
 
+import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import free.lucifer.chiplib.natives.datatypes.uint16;
 import free.lucifer.chiplib.natives.datatypes.uint32;
@@ -44,8 +45,8 @@ public class SpiIocTransfer extends Structure {
         }
     };
 
-    public uint64 txBuff;
-    public uint64 rxBuff;
+    public Pointer txBuff;
+    public Pointer rxBuff;
     public uint32 len;
     public uint32 speedHZ;
     public uint16 delayUSecs;
@@ -63,9 +64,4 @@ public class SpiIocTransfer extends Structure {
     public static int sizeOf() {
         return Structure.newInstance(SpiIocTransfer.class).size();
     }
-
-    public static void main(String[] args) {
-        System.out.println(SpiIocTransfer.sizeOf());
-    }
-
 }
