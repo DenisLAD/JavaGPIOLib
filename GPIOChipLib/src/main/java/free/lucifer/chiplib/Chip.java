@@ -215,6 +215,14 @@ public class Chip implements IOBoard, Runnable {
         }
     }
 
+    public void delay(int ms) {
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(ms));
+    }
+
+    public void delayMicro(int ms) {
+        LockSupport.parkNanos(TimeUnit.MICROSECONDS.toNanos(ms));
+    }
+
     public static enum EventType {
         DATA_CHANGE,
     }
