@@ -20,7 +20,7 @@ import com.sun.jna.Pointer;
 import free.lucifer.chiplib.Chip;
 import free.lucifer.chiplib.Chip.Pin;
 import free.lucifer.chiplib.natives.CLib;
-import free.lucifer.chiplib.natives.NativeSize;
+import free.lucifer.chiplib.natives.datatypes.NativeSize;
 
 public class R8 implements IOBoard {
 

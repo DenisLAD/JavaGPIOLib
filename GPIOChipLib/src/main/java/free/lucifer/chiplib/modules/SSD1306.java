@@ -47,7 +47,7 @@ public class SSD1306 {
     private final I2C i2c;
     private final SPI spi;
 
-    public SSD1306(DisplayType displayType, boolean externalVCC, Chip.Pin dc, Chip.Pin rst, Chip.Pin cs) {
+    public SSD1306(DisplayType displayType, boolean externalVCC, SPI spi, Chip.Pin dc, Chip.Pin rst, Chip.Pin cs) {
         this.data = null;
         this.clk = null;
         this.dc = dc;
@@ -62,7 +62,7 @@ public class SSD1306 {
         this.backBuffer = new byte[displayType.HEIGHT * displayType.WIDTH];
 
         this.i2c = null;
-        this.spi = new SPI();
+        this.spi = spi;
 
         prepareCommands();
     }
@@ -119,7 +119,7 @@ public class SSD1306 {
         this.backBuffer = new byte[displayType.HEIGHT * displayType.WIDTH];
 
         this.i2c = null;
-        this.spi = new SPI();
+        this.spi = null;
 
         prepareCommands();
     }

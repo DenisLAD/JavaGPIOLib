@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.natives;
 
+import com.sun.jna.IntegerType;
+import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Pointer;
 
 public class CLibNative implements CLibInterface {
 
     @Override
     native public int ioctl(int fd, int cmd, int arg);
+
+    @Override
+    native public int ioctl(int fd, int cmd, IntegerType arg);
 
     @Override
     native public int open(String path, int flags);

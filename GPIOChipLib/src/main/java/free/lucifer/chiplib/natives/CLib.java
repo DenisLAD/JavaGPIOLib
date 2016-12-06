@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.natives;
 
+import com.sun.jna.IntegerType;
+import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
@@ -43,6 +44,10 @@ public class CLib {
     }
 
     public int ioctl(int fd, int cmd, int arg) {
+        return nativeLib.ioctl(fd, cmd, arg);
+    }
+
+    public int ioctl(int fd, int cmd, IntegerType arg) {
         return nativeLib.ioctl(fd, cmd, arg);
     }
 

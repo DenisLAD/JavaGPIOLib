@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package free.lucifer.chiplib.natives;
+package free.lucifer.chiplib.natives.datatypes;
 
 import com.sun.jna.IntegerType;
 import com.sun.jna.Native;

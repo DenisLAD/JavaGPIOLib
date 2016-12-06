@@ -16,45 +16,88 @@
 package free.lucifer.chiplib.modules;
 
 import free.lucifer.chiplib.modules.spi.SPIClockDivider;
-
+import free.lucifer.chiplib.natives.CLib;
+import free.lucifer.chiplib.natives.SpiDev;
+import free.lucifer.chiplib.natives.datatypes.uint16;
+import free.lucifer.chiplib.natives.datatypes.uint32;
+import free.lucifer.chiplib.natives.datatypes.uint64;
+import free.lucifer.chiplib.natives.datatypes.uint8;
 
 public class SPI {
 
-    
+    private CLib clib = CLib.INSTANCE;
     private final int bus;
     private final int device;
+    private int fileDescriptor = -1;
+    private int mode = -1;
+    private int bitsPerWord = -1;
+    private int maxSpeedHZ = -1;
 
-    public SPI() {
-        this.bus = 0;
-        this.device = 0;
-        // TODO: Dummy constructor for defaults
-    }
-
-    
-    
     public SPI(int bus, int device) {
         this.bus = bus;
         this.device = device;
     }
 
     public void open() {
+        if (fileDescriptor == -1) {
+            fileDescriptor = CLib.INSTANCE.open(String.format("/dev/spidev%d.%d", bus, device), CLib.O_RDWR);
+            if (fileDescriptor != -1) {
+                mode = read8(SpiDev.SPI_IOC_RD_MODE);
+                bitsPerWord = read8(SpiDev.SPI_IOC_RD_BITS_PER_WORD);
+                maxSpeedHZ = read32(SpiDev.SPI_IOC_RD_MAX_SPEED_HZ);
+            }
+        }
+    }
 
+    private int read8(int cmd) {
+        uint8 tmp = new uint8(0);
+        if (clib.ioctl(fileDescriptor, cmd, tmp) == -1) {
+            return -1;
+        }
+        return tmp.byteValue();
+    }
+
+    private int read16(int cmd) {
+        uint16 tmp = new uint16(0);
+        if (clib.ioctl(fileDescriptor, cmd, tmp) == -1) {
+            return -1;
+        }
+        return tmp.shortValue();
+    }
+
+    private int read32(int cmd) {
+        uint32 tmp = new uint32(0);
+        if (clib.ioctl(fileDescriptor, cmd, tmp) == -1) {
+            return -1;
+        }
+        return tmp.intValue();
+    }
+
+    private long read64(int cmd) {
+        uint64 tmp = new uint64(0);
+        if (clib.ioctl(fileDescriptor, cmd, tmp) == -1) {
+            return -1;
+        }
+        return tmp.longValue();
     }
 
     public void close() {
+        if (fileDescriptor != -1) {
+            clib.close(fileDescriptor);
+            fileDescriptor = -1;
+        }
+    }
+
+    public void begin() {
 
     }
 
-    void begin() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void transfer(int cmd) {
+
     }
 
-    void transfer(int cmd) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void setClockDivider(SPIClockDivider spiClockDivider) {
 
-    void setClockDivider(SPIClockDivider spiClockDivider) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

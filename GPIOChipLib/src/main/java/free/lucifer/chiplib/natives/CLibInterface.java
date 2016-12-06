@@ -16,6 +16,8 @@
 
 package free.lucifer.chiplib.natives;
 
+import com.sun.jna.IntegerType;
+import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Library;
 import com.sun.jna.Pointer;
 
@@ -24,6 +26,8 @@ public interface CLibInterface extends Library {
     public int open(String path, int flags);
 
     public int ioctl(int fd, int cmd, int arg);
+    
+    public int ioctl(int fd, int cmd, IntegerType arg);
 
     public int close(int fd);
 

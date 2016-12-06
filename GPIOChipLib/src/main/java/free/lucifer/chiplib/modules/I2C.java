@@ -17,7 +17,7 @@
 package free.lucifer.chiplib.modules;
 
 import free.lucifer.chiplib.natives.CLib;
-import free.lucifer.chiplib.natives.NativeSize;
+import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class I2C {
