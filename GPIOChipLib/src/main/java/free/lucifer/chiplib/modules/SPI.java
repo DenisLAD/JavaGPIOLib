@@ -282,7 +282,7 @@ public class SPI {
         }
     }
 
-    public void transfer(int cmd) {
-        xfer(new byte[]{(byte) cmd}, maxSpeedHZ, device, bitsPerWord);
+    public byte[] transfer(int cmd) {
+        return xfer(new byte[]{(byte) cmd}, maxSpeedHZ, device, bitsPerWord);
     }
 }
