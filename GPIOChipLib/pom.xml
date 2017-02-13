@@ -19,6 +19,9 @@
             <email>lucifer.and.diablo at gmail.com</email>
             <roles>
                 <role>developer</role>
+                <role>owner</role>
+                <role>evangelist</role>
+                <role>author</role>
             </roles>
             <timezone>Asia/Novosibirsk</timezone>
         </developer>
