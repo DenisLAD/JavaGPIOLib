@@ -39,10 +39,11 @@ Just read data.
 
 Read DHT11 sensor
 ```java
-    DHT11 dht = new DHT11(Chip.Pin.CSID0);
-    Chip.I.addTask(dht);
-    while(dht.getStatus() != DHT11.Status.OK) {
-        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+    Chip.I.open(); // Prepare low level access
+    DHT11 dht = new DHT11(Chip.Pin.CSID0); // Use CSID0 pin
+    Chip.I.addTask(dht); // Add task to interval update
+    while(dht.getStatus() != DHT11.Status.OK) { // Repeat while status in not OK
+        LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1)); // Wait 1 second
     }
     
     System.out.println("Temperature: " + dht.getTemperature());
