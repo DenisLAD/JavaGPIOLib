@@ -1,3 +1,5 @@
+![alt:build](https://travis-ci.org/LuciferAndDiablo/NTC-C.H.I.P.-JavaGPIOLib.svg?branch=master)
+
 # What is NTC C.H.I.P. Java GPIO Library?
 
 Library which helps to communicate with CHIP GPIO using Java language.
