@@ -16,8 +16,6 @@
 
 package free.lucifer.chiplib.boards;
 
-import free.lucifer.chiplib.Chip.Pin;
-
 
 public interface IOBoard {
 
@@ -25,15 +23,15 @@ public interface IOBoard {
 
     public void close();
 
-    public void pinMode(Pin pin, Pin.PinMode mode);
+    public void pinMode(Enum pin, Enum mode);
 
-    public void pwmWrite(Pin pin, int value);
+    public void pwmWrite(Enum pin, int value);
 
-    public int analogRead(Pin pin);
+    public int analogRead(Enum pin);
 
-    public void analogWrite(Pin pin, int value);
+    public void analogWrite(Enum pin, int value);
 
-    public int digiatalRead(Pin pin);
+    public int digiatalRead(Enum pin);
 
-    public void digitalWrite(Pin pin, int value);
+    public void digitalWrite(Enum pin, int value);
 }

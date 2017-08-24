@@ -13,14 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.boards;
 
 import free.lucifer.chiplib.Chip;
 import free.lucifer.chiplib.Chip.Pin;
 import free.lucifer.chiplib.modules.I2C;
 import java.util.concurrent.locks.ReentrantLock;
-
 
 public class AXP209 implements IOBoard {
 
@@ -51,19 +49,19 @@ public class AXP209 implements IOBoard {
     }
 
     @Override
-    public void pinMode(Pin pin, Pin.PinMode mode) {
+    public void pinMode(Enum pin, Enum mode) {
         if (pin == Pin.BAT) {
             configureBatAdc();
         }
     }
 
     @Override
-    public void pwmWrite(Chip.Pin pin, int value) {
+    public void pwmWrite(Enum pin, int value) {
 
     }
 
     @Override
-    public int analogRead(Chip.Pin pin) {
+    public int analogRead(Enum pin) {
         if (pin == Pin.BAT) {
             return readBatVolts();
         } else if (pin == Pin.INTTEMP) {
@@ -76,16 +74,16 @@ public class AXP209 implements IOBoard {
     }
 
     @Override
-    public void analogWrite(Chip.Pin pin, int value) {
+    public void analogWrite(Enum pin, int value) {
     }
 
     @Override
-    public int digiatalRead(Chip.Pin pin) {
+    public int digiatalRead(Enum pin) {
         return -1;
     }
 
     @Override
-    public void digitalWrite(Chip.Pin pin, int value) {
+    public void digitalWrite(Enum pin, int value) {
         if (pin == Pin.STATUS) {
             writeGpio2(value);
         }

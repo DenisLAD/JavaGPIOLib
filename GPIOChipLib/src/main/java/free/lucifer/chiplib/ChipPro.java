@@ -16,6 +16,7 @@
 package free.lucifer.chiplib;
 
 import free.lucifer.chiplib.boards.AXP209;
+import free.lucifer.chiplib.boards.GR8;
 import free.lucifer.chiplib.boards.IOBoard;
 import free.lucifer.chiplib.boards.PCF8574A;
 import free.lucifer.chiplib.boards.R8;
@@ -28,12 +29,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-public class Chip implements IOBoard, Runnable {
+public class ChipPro implements IOBoard, Runnable {
 
     private Map<Class<? extends IOBoard>, IOBoard> registry = new HashMap<>();
     private boolean open = false;
 
-    public static final Chip I = new Chip();
+    public static final ChipPro I = new ChipPro();
 
     private final NullBoard nullBoard = new NullBoard();
     private final List<Enum> poolPin = new CopyOnWriteArrayList<>();
@@ -43,8 +44,8 @@ public class Chip implements IOBoard, Runnable {
     private static final long POOL_INTERVAL = TimeUnit.MILLISECONDS.toNanos(20);
     private Thread poolThread;
 
-    private Chip() {
-        registry.put(R8.class, new R8());
+    private ChipPro() {
+        registry.put(GR8.class, new GR8());
         registry.put(AXP209.class, new AXP209(0, 0x34));
         registry.put(PCF8574A.class, new PCF8574A(2, 0x38));
 
@@ -66,7 +67,7 @@ public class Chip implements IOBoard, Runnable {
     }
 
     private void parsePins() {
-        for (R8.ChipPin pin : R8.ChipPin.values()) {
+        for (GR8.ChipPin pin : GR8.ChipPin.values()) {
             Pin p = Pin.valueOf(pin.toString());
             p.customPin = pin;
         }
@@ -81,7 +82,7 @@ public class Chip implements IOBoard, Runnable {
             }
             long nano = System.nanoTime();
             for (Enum p : poolPin) {
-                Pin pin = (Pin) p;
+                Pin pin = ((ChipPro.Pin) p);
                 if (pin.mode == Pin.PinMode.INPUT) {
                     pin.lastReport = analogRead(pin);
                 } else {
@@ -152,7 +153,7 @@ public class Chip implements IOBoard, Runnable {
 
     @Override
     public void pinMode(Enum pin, Enum mode) {
-        ((Pin) pin).mode = (Pin.PinMode) mode;
+        ((ChipPro.Pin) pin).mode = (ChipPro.Pin.PinMode) mode;
 
         if (mode == Pin.PinMode.INPUT || mode == Pin.PinMode.PWM || mode == Pin.PinMode.ANALOG) {
             if (!poolPin.contains(pin)) {
@@ -162,17 +163,17 @@ public class Chip implements IOBoard, Runnable {
             poolPin.remove(pin);
         }
 
-        ((Pin) pin).managerInstance.pinMode(pin, mode);
+        ((ChipPro.Pin) pin).managerInstance.pinMode(pin, mode);
     }
 
     @Override
     public void pwmWrite(Enum pin, int value) {
-        ((Pin) pin).managerInstance.pwmWrite(pin, value);
+        ((ChipPro.Pin) pin).managerInstance.pwmWrite(pin, value);
     }
 
     @Override
     public int analogRead(Enum pin) {
-        return ((Pin) pin).managerInstance.analogRead(pin);
+        return ((ChipPro.Pin) pin).managerInstance.analogRead(pin);
     }
 
     @Override
@@ -182,12 +183,12 @@ public class Chip implements IOBoard, Runnable {
 
     @Override
     public int digiatalRead(Enum pin) {
-        return ((Pin) pin).managerInstance.digiatalRead(pin);
+        return ((ChipPro.Pin) pin).managerInstance.digiatalRead(pin);
     }
 
     @Override
     public void digitalWrite(Enum pin, int value) {
-        ((Pin) pin).managerInstance.digitalWrite(pin, value);
+        ((ChipPro.Pin) pin).managerInstance.digitalWrite(pin, value);
     }
 
     private void emit(Pin pin) {
@@ -278,54 +279,34 @@ public class Chip implements IOBoard, Runnable {
     }
 
     public static enum Pin {
-        PWM0(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT, PinMode.PWM}, R8.class),
-        LRADC(new PinMode[]{PinMode.ANALOG}, R8.class),
-        LCD_D2(new PinMode[]{PinMode.INPUT}, R8.class),
-        LCD_D3(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D4(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D5(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D6(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D7(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D10(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D11(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D12(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D13(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D14(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D15(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D18(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D19(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D20(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D21(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D22(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_D23(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_CLK(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_VSYNC(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_HSYNC(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        LCD_DE(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        XIO_P0(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P1(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P2(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P3(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P4(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P5(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P6(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        XIO_P7(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, PCF8574A.class),
-        CSIPCK(new PinMode[]{PinMode.INPUT}, R8.class),
-        CSICK(new PinMode[]{PinMode.INPUT}, R8.class),
-        CSIHSYNC(new PinMode[]{PinMode.INPUT}, R8.class),
-        CSIVSYNC(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID0(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID1(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID2(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID3(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID4(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID5(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID6(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        CSID7(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, R8.class),
-        STATUS(new PinMode[]{PinMode.OUTPUT}, PinMode.OUTPUT, 0, 127, AXP209.class),
-        BAT(new PinMode[]{PinMode.ANALOG}, PinMode.INPUT, 0, 127, AXP209.class),
-        INTTEMP(new PinMode[]{PinMode.ANALOG}, PinMode.INPUT, 0, 127, AXP209.class),
-        BTN(new PinMode[]{PinMode.INPUT}, PinMode.INPUT, 0, 127, AXP209.class);
+        PWM0(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT, PinMode.PWM}, GR8.class),
+        PWM1(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT, PinMode.PWM}, GR8.class),
+        LRADC(new PinMode[]{PinMode.ANALOG}, GR8.class),
+        CSIPCK(new PinMode[]{PinMode.INPUT}, GR8.class),
+        CSIMCLK(new PinMode[]{PinMode.INPUT}, GR8.class),
+        CSIHSYNC(new PinMode[]{PinMode.INPUT}, GR8.class),
+        CSIVSYNC(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID0(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID1(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID2(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID3(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID4(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID5(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID6(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        CSID7(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        TWI1_SCK(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        TWI1_SDA(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART2_TX(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART2_RX(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART2_CTS(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART2_RTS(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART1_TX(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        UART1_RX(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        I2S_MCLK(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        I2S_BLCK(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        I2S_LCLK(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        I2S_DO(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class),
+        I2S_DI(new PinMode[]{PinMode.INPUT, PinMode.OUTPUT}, GR8.class);
 
         public final PinMode[] modes;
         private PinMode mode;
@@ -334,7 +315,7 @@ public class Chip implements IOBoard, Runnable {
         private int analogChannel;
         public final Class<? extends IOBoard> manager;
         public IOBoard managerInstance;
-        public R8.ChipPin customPin;
+        public GR8.ChipPin customPin;
 
         private Pin() {
             this.modes = new PinMode[]{};

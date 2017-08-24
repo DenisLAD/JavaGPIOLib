@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.boards;
 
 import free.lucifer.chiplib.Chip.Pin;
@@ -48,9 +47,9 @@ public class PCF8574A implements IOBoard {
         i2c.close();
     }
 
-    private int pinNum(Pin pin) {
+    private int pinNum(Enum pin) {
         int id = -1;
-        switch (pin) {
+        switch ((Pin) pin) {
             case XIO_P0:
                 id = 0;
                 break;
@@ -113,7 +112,7 @@ public class PCF8574A implements IOBoard {
     }
 
     @Override
-    public void pinMode(Pin pin, Pin.PinMode mode) {
+    public void pinMode(Enum pin, Enum mode) {
         int id = pinNum(pin);
         if (id == -1) {
             return;
@@ -129,7 +128,7 @@ public class PCF8574A implements IOBoard {
     }
 
     @Override
-    public void digitalWrite(Pin pin, int value) {
+    public void digitalWrite(Enum pin, int value) {
         int id = pinNum(pin);
         if (id == -1) {
             return;
@@ -140,13 +139,11 @@ public class PCF8574A implements IOBoard {
             writeMask &= ~(1 << id);
         }
 
-//        System.out.print("W:" + (~readMask & writeMask & 0xff) + " ");
-
         i2c.write(new byte[]{(byte) (~readMask & writeMask & 0xff)});
     }
 
     @Override
-    public int digiatalRead(Pin pin) {
+    public int digiatalRead(Enum pin) {
         int val = read();
 //        System.out.print("R:" + val + " ");
         int id = pinNum(pin);
@@ -158,17 +155,17 @@ public class PCF8574A implements IOBoard {
     }
 
     @Override
-    public void pwmWrite(Pin pin, int value) {
+    public void pwmWrite(Enum pin, int value) {
 
     }
 
     @Override
-    public int analogRead(Pin pin) {
+    public int analogRead(Enum pin) {
         return -1;
     }
 
     @Override
-    public void analogWrite(Pin pin, int value) {
+    public void analogWrite(Enum pin, int value) {
 
     }
 }

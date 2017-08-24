@@ -16,19 +16,22 @@
 package free.lucifer.chiplib.boards;
 
 import com.sun.jna.Pointer;
-import free.lucifer.chiplib.Chip;
-import free.lucifer.chiplib.Chip.Pin;
+import free.lucifer.chiplib.ChipPro;
+import free.lucifer.chiplib.ChipPro.Pin;
+import free.lucifer.chiplib.boards.R8.ChipPin.ChipPort;
 import free.lucifer.chiplib.natives.CLib;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 
-public class R8 implements IOBoard {
+public class GR8 implements IOBoard {
 
     private static final int REGISTER_START = 0x01c20000;
     private static final int REGISTER_SIZE = 0x61000;
 
     private static final int PWM = 0x01C20C00;
-    private static final int PWM_CTRL = PWM + 0x0200;
-    private static final int PWM_CH0_PERIOD = PWM + 0x0204;
+    private static final int PWM0_CTRL = PWM + 0x0200;
+    private static final int PWM0_CH0_PERIOD = PWM + 0x0204;
+    private static final int PWM1_CTRL = PWM + 0x0200;
+    private static final int PWM1_CH0_PERIOD = PWM + 0x0204;
 
     private static final int LRADC = 0x01C22800;
     private static final int LRADC_CTRL = LRADC + 0x00;
@@ -77,37 +80,37 @@ public class R8 implements IOBoard {
 
     @Override
     public void pinMode(Enum pin, Enum mode) {
-        if (pin == Pin.LRADC) {
+        if (pin == ChipPro.Pin.LRADC) {
             int lrAdcCtrlVal = 0x01;
             writeRegister(LRADC_CTRL, lrAdcCtrlVal);
         } else {
-            ChipPin p = ((Chip.Pin) pin).customPin;
+            ChipPin p = ((ChipPro.Pin) pin).customPin;
             if (p != null) {
                 int register = p.register;
                 int index = p.index;
 
-                if (mode == Pin.PinMode.PWM) {
-                    mode = Pin.PinMode.ANALOG;
+                if (mode == ChipPro.Pin.PinMode.PWM) {
+                    mode = ChipPro.Pin.PinMode.ANALOG;
                 }
                 if (mode == Pin.PinMode.INPUT_PULLUP) {
                     mode = Pin.PinMode.INPUT;
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((Chip.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((ChipPro.Pin.PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 } else {
 
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((Chip.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((ChipPro.Pin.PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 }
                 int cfgReg = p.port.cfg[register];
                 int cfgVal = readRegister(cfgReg);
 
-                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((Chip.Pin.PinMode) mode).id << (index * 4));
+                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((ChipPro.Pin.PinMode) mode).id << (index * 4));
 
                 writeRegister(cfgReg, cfgVal);
 
@@ -116,8 +119,14 @@ public class R8 implements IOBoard {
         if (pin == Pin.PWM0 && mode == Pin.PinMode.ANALOG) {
             int pwmCtrlVal = (1 << 6) | (1 << 5) | (1 << 4);
             int pwmPeriodVal = (0xff << 16) | 0;
-            writeRegister(PWM_CH0_PERIOD, pwmPeriodVal);
-            writeRegister(PWM_CTRL, pwmCtrlVal);
+            writeRegister(PWM0_CH0_PERIOD, pwmPeriodVal);
+            writeRegister(PWM0_CTRL, pwmCtrlVal);
+        }
+        if (pin == Pin.PWM1 && mode == Pin.PinMode.ANALOG) {
+            int pwmCtrlVal = (1 << 6) | (1 << 5) | (1 << 4);
+            int pwmPeriodVal = (0xff << 16) | 0;
+            writeRegister(PWM1_CH0_PERIOD, pwmPeriodVal);
+            writeRegister(PWM1_CTRL, pwmCtrlVal);
         }
     }
 
@@ -125,7 +134,11 @@ public class R8 implements IOBoard {
     public void pwmWrite(Enum pin, int value) {
         if (pin == Pin.PWM0) {
             int pwmPeriodVal = (0xff << 16) | Math.round(value);
-            writeRegister(PWM_CH0_PERIOD, pwmPeriodVal);
+            writeRegister(PWM0_CH0_PERIOD, pwmPeriodVal);
+        }
+        if (pin == Pin.PWM1) {
+            int pwmPeriodVal = (0xff << 16) | Math.round(value);
+            writeRegister(PWM1_CH0_PERIOD, pwmPeriodVal);
         }
     }
 
@@ -146,7 +159,7 @@ public class R8 implements IOBoard {
     @Override
     public int digiatalRead(Enum pin) {
         if (pin != Pin.LRADC) {
-            ChipPin p = ((Chip.Pin) pin).customPin;
+            ChipPin p = ((ChipPro.Pin) pin).customPin;
             if (p != null) {
 //                int dataVal = readRegister(p.port.data);
 //                int pinMask = 1 << (p.register * 8 + p.index);
@@ -158,7 +171,7 @@ public class R8 implements IOBoard {
 
     @Override
     public void digitalWrite(Enum pin, int value) {
-        ChipPin p = ((Chip.Pin) pin).customPin;
+        ChipPin p = ((ChipPro.Pin) pin).customPin;
         if (p != null) {
             int dataVal = readRegister(p.port.data);
             int pinMask = p.shift;
@@ -183,32 +196,17 @@ public class R8 implements IOBoard {
 
     public static enum ChipPin {
         PWM0(ChipPort.B, 0, 2),
-        LCD_D2(ChipPort.D, 0, 2),
-        LCD_D3(ChipPort.D, 0, 3),
-        LCD_D4(ChipPort.D, 0, 4),
-        LCD_D5(ChipPort.D, 0, 5),
-        LCD_D6(ChipPort.D, 0, 6),
-        LCD_D7(ChipPort.D, 0, 7),
-        LCD_D10(ChipPort.D, 1, 2),
-        LCD_D11(ChipPort.D, 1, 3),
-        LCD_D12(ChipPort.D, 1, 4),
-        LCD_D13(ChipPort.D, 1, 5),
-        LCD_D14(ChipPort.D, 1, 6),
-        LCD_D15(ChipPort.D, 1, 7),
-        LCD_D18(ChipPort.D, 2, 2),
-        LCD_D19(ChipPort.D, 2, 3),
-        LCD_D20(ChipPort.D, 2, 4),
-        LCD_D21(ChipPort.D, 2, 5),
-        LCD_D22(ChipPort.D, 2, 6),
-        LCD_D23(ChipPort.D, 2, 7),
-        LCD_CLK(ChipPort.D, 3, 0),
-        LCD_DE(ChipPort.D, 3, 1),
-        LCD_HSYNC(ChipPort.D, 3, 2),
-        LCD_VSYNC(ChipPort.D, 3, 3),
-        CSIPCK(ChipPort.E, 0, 0),
-        CSICK(ChipPort.E, 0, 1),
-        CSIHSYNC(ChipPort.E, 0, 2),
-        CSIVSYNC(ChipPort.E, 0, 3),
+        PWM1(ChipPort.G, 1, 5),
+        TWI1_SCK(ChipPort.B, 1, 7),
+        TWI1_SDA(ChipPort.B, 2, 0),
+        UART2_TX(ChipPort.D, 0, 2),
+        UART2_RX(ChipPort.D, 0, 3),
+        UART2_CTS(ChipPort.D, 0, 4),
+        UART2_RTS(ChipPort.D, 0, 5),
+        CSIPCK(ChipPort.E, 3, 0),
+        CSIMCLK(ChipPort.E, 3, 1),
+        CSIHSYNC(ChipPort.E, 3, 2),
+        CSIVSYNC(ChipPort.E, 3, 3),
         CSID0(ChipPort.E, 0, 4),
         CSID1(ChipPort.E, 0, 5),
         CSID2(ChipPort.E, 0, 6),
@@ -217,7 +215,13 @@ public class R8 implements IOBoard {
         CSID5(ChipPort.E, 1, 1),
         CSID6(ChipPort.E, 1, 2),
         CSID7(ChipPort.E, 1, 3),
-        LRADC(ChipPort.NONE, 0, 0);
+        UART1_TX(ChipPort.G, 0, 3),
+        UART1_RX(ChipPort.G, 0, 4),
+        I2S_MCLK(ChipPort.B, 0, 5),
+        I2S_BLCK(ChipPort.B, 0, 6),
+        I2S_LCLK(ChipPort.B, 0, 7),
+        I2S_DO(ChipPort.B, 1, 0),
+        I2S_DI(ChipPort.B, 1, 1);
 
         public final ChipPort port;
         public final int register;
@@ -232,28 +236,6 @@ public class R8 implements IOBoard {
         }
 
         private static final int PIO = 0x01C20800;
-
-        public enum ChipPort {
-            NONE(null, 0, null, null),
-            B(new int[]{PIO + 0x24, PIO + 0x28, PIO + 0x2c, PIO + 0x30}, PIO + 0x34, new int[]{PIO + 0x38, PIO + 0x3c}, new int[]{PIO + 0x40, PIO + 0x44}),
-            C(new int[]{PIO + 0x48, PIO + 0x4c, PIO + 0x50, PIO + 0x54}, PIO + 0x58, new int[]{PIO + 0x5c, PIO + 0x60}, new int[]{PIO + 0x64, PIO + 0x68}),
-            D(new int[]{PIO + 0x6c, PIO + 0x70, PIO + 0x74, PIO + 0x78}, PIO + 0x7c, new int[]{PIO + 0x80, PIO + 0x84}, new int[]{PIO + 0x88, PIO + 0x8c}),
-            E(new int[]{PIO + 0x90, PIO + 0x94, PIO + 0x98, PIO + 0x9c}, PIO + 0xa0, new int[]{PIO + 0xa4, PIO + 0xa8}, new int[]{PIO + 0xac, PIO + 0xb0}),
-            F(new int[]{PIO + 0xb4, PIO + 0xb8, PIO + 0xbc, PIO + 0xc0}, PIO + 0xc4, new int[]{PIO + 0xc8, PIO + 0xcc}, new int[]{PIO + 0xd0, PIO + 0xd4}),
-            G(new int[]{PIO + 0xd8, PIO + 0xdc, PIO + 0xe0, PIO + 0xe4}, PIO + 0xe8, new int[]{PIO + 0xec, PIO + 0xf0}, new int[]{PIO + 0xf4, PIO + 0xf8});
-
-            public final int[] cfg;
-            public final int data;
-            public final int[] driver;
-            public final int[] pull;
-
-            private ChipPort(int[] cfg, int data, int[] driver, int[] pull) {
-                this.cfg = cfg;
-                this.data = data;
-                this.driver = driver;
-                this.pull = pull;
-            }
-        }
 
     }
 }
