@@ -18,6 +18,10 @@ package free.lucifer.chiplib.natives;
 import com.sun.jna.IntegerType;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.datatypes.uint16;
+import free.lucifer.chiplib.natives.datatypes.uint32;
+import free.lucifer.chiplib.natives.datatypes.uint64;
+import free.lucifer.chiplib.natives.datatypes.uint8;
 import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public class CLibNative implements CLibInterface {
@@ -26,7 +30,16 @@ public class CLibNative implements CLibInterface {
     native public int ioctl(int fd, int cmd, int arg);
 
     @Override
-    native public int ioctl(int fd, int cmd, IntegerType arg);
+    native public int ioctl(int fd, int cmd, uint8 arg);
+
+    @Override
+    native public int ioctl(int fd, int cmd, uint16 arg);
+
+    @Override
+    native public int ioctl(int fd, int cmd, uint32 arg);
+
+    @Override
+    native public int ioctl(int fd, int cmd, uint64 arg);
 
     @Override
     native public int open(String path, int flags);

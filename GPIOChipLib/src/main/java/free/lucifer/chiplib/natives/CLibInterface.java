@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.natives;
 
-import com.sun.jna.IntegerType;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Library;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.datatypes.uint16;
+import free.lucifer.chiplib.natives.datatypes.uint32;
+import free.lucifer.chiplib.natives.datatypes.uint64;
+import free.lucifer.chiplib.natives.datatypes.uint8;
 import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public interface CLibInterface extends Library {
@@ -27,9 +29,15 @@ public interface CLibInterface extends Library {
     public int open(String path, int flags);
 
     public int ioctl(int fd, int cmd, int arg);
-    
-    public int ioctl(int fd, int cmd, IntegerType arg);
-    
+
+    public int ioctl(int fd, int cmd, uint8 arg);
+
+    public int ioctl(int fd, int cmd, uint16 arg);
+
+    public int ioctl(int fd, int cmd, uint32 arg);
+
+    public int ioctl(int fd, int cmd, uint64 arg);
+
     public int ioctl(int fd, int cmd, SpiIocTransfer spiData);
 
     public int close(int fd);

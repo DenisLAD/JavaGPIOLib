@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.modules;
 
 import free.lucifer.chiplib.Chip.Pin;
+import free.lucifer.chiplib.PinMode;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
@@ -56,14 +56,14 @@ public class DHT11 extends Task {
     public DHT11(Pin pin) {
         this.pin = pin;
         this.period = TimeUnit.SECONDS.toNanos(2);
-        pin.managerInstance.pinMode(pin, Pin.PinMode.OUTPUT);
+        pin.managerInstance.pinMode(pin, PinMode.OUTPUT);
         pin.managerInstance.digitalWrite(pin, 1);
     }
 
     @Override
     public void doTask() {
         read();
-        pin.managerInstance.pinMode(pin, Pin.PinMode.OUTPUT);
+        pin.managerInstance.pinMode(pin, PinMode.OUTPUT);
         pin.managerInstance.digitalWrite(pin, 1);
 
 //        SimpleDateFormat sdf = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss");
@@ -81,7 +81,7 @@ public class DHT11 extends Task {
         delay(18);
         pin.managerInstance.digitalWrite(pin, 1);
 //        delayMicro(2);
-        pin.managerInstance.pinMode(pin, Pin.PinMode.INPUT_PULLUP);
+        pin.managerInstance.pinMode(pin, PinMode.INPUT_PULLUP);
         status = Status.OK;
 
         if (expectPulse(0) == 0) {

@@ -15,11 +15,14 @@
  */
 package free.lucifer.chiplib.modules;
 
+import free.lucifer.chiplib.AbstractChip;
 import free.lucifer.chiplib.Chip;
+import free.lucifer.chiplib.PinMode;
 import free.lucifer.chiplib.modules.ssd1306.Commands;
 import free.lucifer.chiplib.modules.ssd1306.Consts;
 import free.lucifer.chiplib.modules.ssd1306.ControlType;
 import free.lucifer.chiplib.modules.ssd1306.DisplayType;
+import free.lucifer.chiplib.utils.Registry;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -28,7 +31,7 @@ import java.util.Arrays;
 
 public class SSD1306 {
 
-    private final Chip CHIP = Chip.I;
+    private final AbstractChip CHIP = Registry.INSTANCE.board();
 
     private final Chip.Pin data;
     private final Chip.Pin clk;
@@ -152,14 +155,14 @@ public class SSD1306 {
 
         switch (control) {
             case SW_SPI:
-                CHIP.pinMode(dc, Chip.Pin.PinMode.OUTPUT);
-                CHIP.pinMode(cs, Chip.Pin.PinMode.OUTPUT);
-                CHIP.pinMode(clk, Chip.Pin.PinMode.OUTPUT);
-                CHIP.pinMode(data, Chip.Pin.PinMode.OUTPUT);
+                CHIP.pinMode(dc, PinMode.OUTPUT);
+                CHIP.pinMode(cs, PinMode.OUTPUT);
+                CHIP.pinMode(clk, PinMode.OUTPUT);
+                CHIP.pinMode(data, PinMode.OUTPUT);
                 break;
             case HW_SPI:
-                CHIP.pinMode(dc, Chip.Pin.PinMode.OUTPUT);
-                CHIP.pinMode(cs, Chip.Pin.PinMode.OUTPUT);
+                CHIP.pinMode(dc, PinMode.OUTPUT);
+                CHIP.pinMode(cs, PinMode.OUTPUT);
                 spi.open();
                 break;
             case I2C:
@@ -168,7 +171,7 @@ public class SSD1306 {
         }
 
         if (reset && rst != null) {
-            CHIP.pinMode(rst, Chip.Pin.PinMode.OUTPUT);
+            CHIP.pinMode(rst, PinMode.OUTPUT);
             CHIP.digitalWrite(rst, 1);
             CHIP.delay(1);
             CHIP.digitalWrite(rst, 0);

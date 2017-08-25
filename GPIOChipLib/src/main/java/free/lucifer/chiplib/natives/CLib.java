@@ -15,11 +15,14 @@
  */
 package free.lucifer.chiplib.natives;
 
-import com.sun.jna.IntegerType;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
+import free.lucifer.chiplib.natives.datatypes.uint16;
+import free.lucifer.chiplib.natives.datatypes.uint32;
+import free.lucifer.chiplib.natives.datatypes.uint64;
+import free.lucifer.chiplib.natives.datatypes.uint8;
 import free.lucifer.chiplib.natives.spi.SpiIocTransfer;
 
 public class CLib {
@@ -48,7 +51,19 @@ public class CLib {
         return nativeLib.ioctl(fd, cmd, arg);
     }
 
-    public int ioctl(int fd, int cmd, IntegerType arg) {
+    public int ioctl(int fd, int cmd, uint8 arg) {
+        return nativeLib.ioctl(fd, cmd, arg);
+    }
+
+    public int ioctl(int fd, int cmd, uint16 arg) {
+        return nativeLib.ioctl(fd, cmd, arg);
+    }
+
+    public int ioctl(int fd, int cmd, uint32 arg) {
+        return nativeLib.ioctl(fd, cmd, arg);
+    }
+
+    public int ioctl(int fd, int cmd, uint64 arg) {
         return nativeLib.ioctl(fd, cmd, arg);
     }
 

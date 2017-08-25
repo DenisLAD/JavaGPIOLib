@@ -18,6 +18,7 @@ package free.lucifer.chiplib.boards;
 import com.sun.jna.Pointer;
 import free.lucifer.chiplib.Chip;
 import free.lucifer.chiplib.Chip.Pin;
+import free.lucifer.chiplib.PinMode;
 import free.lucifer.chiplib.natives.CLib;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
 
@@ -86,34 +87,34 @@ public class R8 implements IOBoard {
                 int register = p.register;
                 int index = p.index;
 
-                if (mode == Pin.PinMode.PWM) {
-                    mode = Pin.PinMode.ANALOG;
+                if (mode == PinMode.PWM) {
+                    mode = PinMode.ANALOG;
                 }
-                if (mode == Pin.PinMode.INPUT_PULLUP) {
-                    mode = Pin.PinMode.INPUT;
+                if (mode == PinMode.INPUT_PULLUP) {
+                    mode = PinMode.INPUT;
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((Chip.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 } else {
 
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((Chip.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 }
                 int cfgReg = p.port.cfg[register];
                 int cfgVal = readRegister(cfgReg);
 
-                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((Chip.Pin.PinMode) mode).id << (index * 4));
+                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((PinMode) mode).id << (index * 4));
 
                 writeRegister(cfgReg, cfgVal);
 
             }
         }
-        if (pin == Pin.PWM0 && mode == Pin.PinMode.ANALOG) {
+        if (pin == Pin.PWM0 && mode == PinMode.ANALOG) {
             int pwmCtrlVal = (1 << 6) | (1 << 5) | (1 << 4);
             int pwmPeriodVal = (0xff << 16) | 0;
             writeRegister(PWM_CH0_PERIOD, pwmPeriodVal);

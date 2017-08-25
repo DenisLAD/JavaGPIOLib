@@ -18,6 +18,7 @@ package free.lucifer.chiplib.boards;
 import com.sun.jna.Pointer;
 import free.lucifer.chiplib.ChipPro;
 import free.lucifer.chiplib.ChipPro.Pin;
+import free.lucifer.chiplib.PinMode;
 import free.lucifer.chiplib.boards.R8.ChipPin.ChipPort;
 import free.lucifer.chiplib.natives.CLib;
 import free.lucifer.chiplib.natives.datatypes.NativeSize;
@@ -84,45 +85,45 @@ public class GR8 implements IOBoard {
             int lrAdcCtrlVal = 0x01;
             writeRegister(LRADC_CTRL, lrAdcCtrlVal);
         } else {
-            ChipPin p = ((ChipPro.Pin) pin).customPin;
+            ChipPin p = (ChipPin) ((ChipPro.Pin) pin).customPin;
             if (p != null) {
                 int register = p.register;
                 int index = p.index;
 
-                if (mode == ChipPro.Pin.PinMode.PWM) {
-                    mode = ChipPro.Pin.PinMode.ANALOG;
+                if (mode == PinMode.PWM) {
+                    mode = PinMode.ANALOG;
                 }
-                if (mode == Pin.PinMode.INPUT_PULLUP) {
-                    mode = Pin.PinMode.INPUT;
+                if (mode == PinMode.INPUT_PULLUP) {
+                    mode = PinMode.INPUT;
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((ChipPro.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 } else {
 
                     int pullupReg = p.port.pull[register >> 2];
                     int pullupCfg = readRegister(pullupReg);
 
-                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((ChipPro.Pin.PinMode) mode).id << (index * 2));
+                    pullupCfg = (pullupCfg & ~(0x03 << (index * 2))) | (((PinMode) mode).id << (index * 2));
                     writeRegister(pullupReg, pullupCfg);
                 }
                 int cfgReg = p.port.cfg[register];
                 int cfgVal = readRegister(cfgReg);
 
-                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((ChipPro.Pin.PinMode) mode).id << (index * 4));
+                cfgVal = (cfgVal & ~(0x07 << (index * 4))) | (((PinMode) mode).id << (index * 4));
 
                 writeRegister(cfgReg, cfgVal);
 
             }
         }
-        if (pin == Pin.PWM0 && mode == Pin.PinMode.ANALOG) {
+        if (pin == Pin.PWM0 && mode == PinMode.ANALOG) {
             int pwmCtrlVal = (1 << 6) | (1 << 5) | (1 << 4);
             int pwmPeriodVal = (0xff << 16) | 0;
             writeRegister(PWM0_CH0_PERIOD, pwmPeriodVal);
             writeRegister(PWM0_CTRL, pwmCtrlVal);
         }
-        if (pin == Pin.PWM1 && mode == Pin.PinMode.ANALOG) {
+        if (pin == Pin.PWM1 && mode == PinMode.ANALOG) {
             int pwmCtrlVal = (1 << 6) | (1 << 5) | (1 << 4);
             int pwmPeriodVal = (0xff << 16) | 0;
             writeRegister(PWM1_CH0_PERIOD, pwmPeriodVal);
@@ -159,7 +160,7 @@ public class GR8 implements IOBoard {
     @Override
     public int digiatalRead(Enum pin) {
         if (pin != Pin.LRADC) {
-            ChipPin p = ((ChipPro.Pin) pin).customPin;
+            ChipPin p = (ChipPin) ((ChipPro.Pin) pin).customPin;
             if (p != null) {
 //                int dataVal = readRegister(p.port.data);
 //                int pinMask = 1 << (p.register * 8 + p.index);
@@ -171,7 +172,7 @@ public class GR8 implements IOBoard {
 
     @Override
     public void digitalWrite(Enum pin, int value) {
-        ChipPin p = ((ChipPro.Pin) pin).customPin;
+        ChipPin p = (ChipPin) ((ChipPro.Pin) pin).customPin;
         if (p != null) {
             int dataVal = readRegister(p.port.data);
             int pinMask = p.shift;

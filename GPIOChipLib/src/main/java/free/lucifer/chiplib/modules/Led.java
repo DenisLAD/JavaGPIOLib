@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package free.lucifer.chiplib.modules;
 
-import free.lucifer.chiplib.Chip;
+import free.lucifer.chiplib.PinMode;
+import free.lucifer.chiplib.utils.Registry;
 import java.util.concurrent.TimeUnit;
 
 public class Led extends Task {
 
     private boolean active = false;
     private boolean taskAdded = false;
-    private Chip.Pin pin;
+    private Enum pin;
 
-    public Led(Chip.Pin pin) {
-        Chip.I.pinMode(pin, Chip.Pin.PinMode.OUTPUT);
+    public Led(Enum pin) {
+        Registry.INSTANCE.board().pinMode(pin, PinMode.OUTPUT);
         this.pin = pin;
     }
 
@@ -43,24 +43,24 @@ public class Led extends Task {
         period = TimeUnit.MILLISECONDS.toNanos(ms);
         delta = 0;
         if (!taskAdded) {
-            Chip.I.addTask(this);
+            Registry.INSTANCE.board().addTask(this);
             taskAdded = true;
         }
     }
 
     public void on() {
         active = true;
-        Chip.I.digitalWrite(pin, 1);
+        Registry.INSTANCE.board().digitalWrite(pin, 1);
     }
 
     public void off() {
         active = false;
-        Chip.I.digitalWrite(pin, 0);
+        Registry.INSTANCE.board().digitalWrite(pin, 0);
     }
 
     public void stopBlinking() {
         if (taskAdded) {
-            Chip.I.removeTask(this);
+            Registry.INSTANCE.board().removeTask(this);
             taskAdded = false;
         }
     }

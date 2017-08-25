@@ -24,6 +24,7 @@ import static free.lucifer.chiplib.Chip.Pin.XIO_P4;
 import static free.lucifer.chiplib.Chip.Pin.XIO_P5;
 import static free.lucifer.chiplib.Chip.Pin.XIO_P6;
 import static free.lucifer.chiplib.Chip.Pin.XIO_P7;
+import free.lucifer.chiplib.PinMode;
 import free.lucifer.chiplib.modules.I2C;
 
 public class PCF8574A implements IOBoard {
@@ -118,7 +119,7 @@ public class PCF8574A implements IOBoard {
             return;
         }
 
-        if (mode == Pin.PinMode.INPUT) {
+        if (mode == PinMode.INPUT) {
             readMask |= (1 << id);
         } else {
             readMask &= ~(1 << id);

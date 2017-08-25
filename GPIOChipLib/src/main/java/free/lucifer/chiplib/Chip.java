@@ -19,262 +19,18 @@ import free.lucifer.chiplib.boards.AXP209;
 import free.lucifer.chiplib.boards.IOBoard;
 import free.lucifer.chiplib.boards.PCF8574A;
 import free.lucifer.chiplib.boards.R8;
-import free.lucifer.chiplib.modules.Task;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 
-public class Chip implements IOBoard, Runnable {
-
-    private Map<Class<? extends IOBoard>, IOBoard> registry = new HashMap<>();
-    private boolean open = false;
+public class Chip extends AbstractChip {
 
     public static final Chip I = new Chip();
 
-    private final NullBoard nullBoard = new NullBoard();
-    private final List<Enum> poolPin = new CopyOnWriteArrayList<>();
-    private final List<Task> tasks = new CopyOnWriteArrayList<>();
-    private final Map<Pin, List<PinListener>> listeners = new ConcurrentHashMap<Pin, List<PinListener>>();
-
-    private static final long POOL_INTERVAL = TimeUnit.MILLISECONDS.toNanos(20);
-    private Thread poolThread;
-
     private Chip() {
-        registry.put(R8.class, new R8());
-        registry.put(AXP209.class, new AXP209(0, 0x34));
-        registry.put(PCF8574A.class, new PCF8574A(2, 0x38));
-
-        embedIO();
-        parsePins();
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                close();
-            }
-        });
-    }
-
-    private void embedIO() {
-        for (Pin pin : Pin.values()) {
-            pin.managerInstance = registry.get(pin.manager);
-        }
-    }
-
-    private void parsePins() {
-        for (R8.ChipPin pin : R8.ChipPin.values()) {
-            Pin p = Pin.valueOf(pin.toString());
-            p.customPin = pin;
-        }
+        super(new R8(), new AXP209(0, 0x34), new PCF8574A(2, 0x38));
     }
 
     @Override
-    public void run() {
-        long shift = 0;
-        while (open) {
-            if (POOL_INTERVAL - shift > 0) {
-                LockSupport.parkNanos(POOL_INTERVAL - shift);
-            }
-            long nano = System.nanoTime();
-            for (Enum p : poolPin) {
-                Pin pin = (Pin) p;
-                if (pin.mode == Pin.PinMode.INPUT) {
-                    pin.lastReport = analogRead(pin);
-                } else {
-                    pin.lastReport = digiatalRead(pin);
-                }
-
-                if (pin.report != pin.lastReport) {
-                    emit(pin);
-                    pin.report = pin.lastReport;
-                }
-            }
-            for (Task task : tasks) {
-                task.delta += POOL_INTERVAL;
-                if (task.delta > task.period) {
-                    task.delta -= task.period;
-                    task.doTask();
-                }
-            }
-            shift = System.nanoTime() - nano;
-        }
-    }
-
-    public void subscribePinChange(Pin pin, PinListener listener) {
-        List<PinListener> list = listeners.get(pin);
-        if (list == null) {
-            list = new CopyOnWriteArrayList<>();
-            listeners.put(pin, list);
-        }
-
-        list.add(listener);
-    }
-
-    public void unSubscribePinChange(Pin pin, PinListener listener) {
-        List<PinListener> list = listeners.get(pin);
-        if (list == null) {
-            list = new CopyOnWriteArrayList<>();
-            listeners.put(pin, list);
-        }
-
-        list.remove(listener);
-    }
-
-    public void addTask(Task task) {
-        tasks.add(task);
-    }
-
-    public void removeTask(Task task) {
-        tasks.remove(task);
-    }
-
-    @Override
-    public void open() {
-        for (IOBoard io : registry.values()) {
-            io.open();
-        }
-        open = true;
-        poolThread = new Thread(this);
-        poolThread.start();
-    }
-
-    @Override
-    public void close() {
-        for (IOBoard io : registry.values()) {
-            io.close();
-        }
-        open = false;
-    }
-
-    @Override
-    public void pinMode(Enum pin, Enum mode) {
-        ((Pin) pin).mode = (Pin.PinMode) mode;
-
-        if (mode == Pin.PinMode.INPUT || mode == Pin.PinMode.PWM || mode == Pin.PinMode.ANALOG) {
-            if (!poolPin.contains(pin)) {
-                poolPin.add(pin);
-            }
-        } else if (poolPin.contains(pin)) {
-            poolPin.remove(pin);
-        }
-
-        ((Pin) pin).managerInstance.pinMode(pin, mode);
-    }
-
-    @Override
-    public void pwmWrite(Enum pin, int value) {
-        ((Pin) pin).managerInstance.pwmWrite(pin, value);
-    }
-
-    @Override
-    public int analogRead(Enum pin) {
-        return ((Pin) pin).managerInstance.analogRead(pin);
-    }
-
-    @Override
-    public void analogWrite(Enum pin, int value) {
-        pwmWrite(pin, value);
-    }
-
-    @Override
-    public int digiatalRead(Enum pin) {
-        return ((Pin) pin).managerInstance.digiatalRead(pin);
-    }
-
-    @Override
-    public void digitalWrite(Enum pin, int value) {
-        ((Pin) pin).managerInstance.digitalWrite(pin, value);
-    }
-
-    private void emit(Pin pin) {
-        List<PinListener> list = listeners.get(pin);
-        if (list == null) {
-            return;
-        }
-        for (PinListener listener : list) {
-            listener.onPinChange(pin, pin.report, pin.lastReport);
-        }
-    }
-
-    public void shiftOut(Pin dataPin, Pin clockPin, byte value) {
-        shiftOut(dataPin, clockPin, value, true);
-    }
-
-    public void shiftOut(Pin dataPin, Pin clockPin, byte value, boolean isBigEndian) {
-        for (int i = 0; i < 8; i++) {
-            digitalWrite(clockPin, 0);
-            if (isBigEndian) {
-                digitalWrite(dataPin, (value & (1 << (7 - i))) == 0 ? 0 : 1);
-            } else {
-                digitalWrite(dataPin, (value & (1 << i)) == 0 ? 0 : 1);
-            }
-            digitalWrite(clockPin, 1);
-        }
-    }
-
-    public void delay(int ms) {
-        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(ms));
-    }
-
-    public void delayMicro(int ms) {
-        LockSupport.parkNanos(TimeUnit.MICROSECONDS.toNanos(ms));
-    }
-
-    public static enum EventType {
-        DATA_CHANGE,
-    }
-
-    public static interface PinListener {
-
-        void onPinChange(Pin pin, int old, int val);
-    }
-
-    private static class NullBoard implements IOBoard {
-
-        @Override
-        public void open() {
-
-        }
-
-        @Override
-        public void close() {
-
-        }
-
-        @Override
-        public void pinMode(Enum pin, Enum mode) {
-
-        }
-
-        @Override
-        public void pwmWrite(Enum pin, int value) {
-
-        }
-
-        @Override
-        public int analogRead(Enum pin) {
-            return -1;
-        }
-
-        @Override
-        public void analogWrite(Enum pin, int value) {
-
-        }
-
-        @Override
-        public int digiatalRead(Enum pin) {
-            return -1;
-        }
-
-        @Override
-        public void digitalWrite(Enum pin, int value) {
-
-        }
-
+    protected Class<?> getTargetPinMapping() {
+        return R8.ChipPin.class;
     }
 
     public static enum Pin {
@@ -328,10 +84,10 @@ public class Chip implements IOBoard, Runnable {
         BTN(new PinMode[]{PinMode.INPUT}, PinMode.INPUT, 0, 127, AXP209.class);
 
         public final PinMode[] modes;
-        private PinMode mode;
-        private int report;
-        private int lastReport;
-        private int analogChannel;
+        public PinMode mode;
+        public int report;
+        public int lastReport;
+        public int analogChannel;
         public final Class<? extends IOBoard> manager;
         public IOBoard managerInstance;
         public R8.ChipPin customPin;
@@ -402,22 +158,6 @@ public class Chip implements IOBoard, Runnable {
 
         public void setAnalogChannel(int analogChannel) {
             this.analogChannel = analogChannel;
-        }
-
-        public static enum PinMode {
-            NONE(-1),
-            INPUT(0),
-            OUTPUT(1),
-            ANALOG(2),
-            PWM(3),
-            SERVO(4),
-            INPUT_PULLUP(5);
-
-            public final int id;
-
-            private PinMode(int id) {
-                this.id = id;
-            }
         }
     }
 }

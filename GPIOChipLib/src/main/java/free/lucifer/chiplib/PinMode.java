@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Denis Andreev.
+ * Copyright 2017 lucifer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package free.lucifer.chiplib.boards;
+package free.lucifer.chiplib;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
+/**
+ *
+ * @author lucifer
+ */
+public enum PinMode {
+    NONE(-1),
+    INPUT(0),
+    OUTPUT(1),
+    ANALOG(2),
+    PWM(3),
+    SERVO(4),
+    INPUT_PULLUP(5);
 
-public interface IOBoard {
+    public final int id;
 
-    public void open();
-
-    public void close();
-
-    public void pinMode(Enum pin, Enum mode);
-
-    public void pwmWrite(Enum pin, int value);
-
-    public int analogRead(Enum pin);
-
-    public void analogWrite(Enum pin, int value);
-
-    public int digiatalRead(Enum pin);
-
-    public void digitalWrite(Enum pin, int value);
-
+    private PinMode(int id) {
+        this.id = id;
+    }
 }

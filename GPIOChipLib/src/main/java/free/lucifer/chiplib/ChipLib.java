@@ -49,35 +49,35 @@ public class ChipLib {
         chip.close();
     }
 
-    public void pinMode(Chip.Pin pin, Chip.Pin.PinMode mode) {
+    public void pinMode(Enum pin, PinMode mode) {
         chip.pinMode(pin, mode);
     }
 
-    public void pwmWrite(Chip.Pin pin, int value) {
+    public void pwmWrite(Enum pin, int value) {
         chip.pwmWrite(pin, value);
     }
 
-    public int analogRead(Chip.Pin pin) {
+    public int analogRead(Enum pin) {
         return chip.analogRead(pin);
     }
 
-    public void analogWrite(Chip.Pin pin, int value) {
+    public void analogWrite(Enum pin, int value) {
         chip.analogWrite(pin, value);
     }
 
-    public int digiatalRead(Chip.Pin pin) {
+    public int digiatalRead(Enum pin) {
         return chip.digiatalRead(pin);
     }
 
-    public void digitalWrite(Chip.Pin pin, int value) {
+    public void digitalWrite(Enum pin, int value) {
         chip.digitalWrite(pin, value);
     }
 
-    public void shiftOut(Chip.Pin dataPin, Chip.Pin clockPin, byte value) {
+    public void shiftOut(Enum dataPin, Enum clockPin, byte value) {
         chip.shiftOut(dataPin, clockPin, value);
     }
 
-    public void shiftOut(Chip.Pin dataPin, Chip.Pin clockPin, byte value, boolean isBigEndian) {
+    public void shiftOut(Enum dataPin, Enum clockPin, byte value, boolean isBigEndian) {
         chip.shiftOut(dataPin, clockPin, value, isBigEndian);
     }
 
