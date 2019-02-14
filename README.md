@@ -9,7 +9,7 @@ Library which helps to communicate with CHIP GPIO using Java language.
 Clone project and install in local repository.
 
 ```shell
-git clone https://github.com/LuciferAndDiablo/NTC-C.H.I.P.-JavaGPIOLib.git
+git clone https://github.com/DenisLAD/JavaGPIOLib.git
 cd GPIOChipLib
 mvn install
 ```
